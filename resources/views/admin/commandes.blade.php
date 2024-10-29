@@ -21,8 +21,10 @@
                     <tr>
                         <th>Order #</th>
                         <th>Nom client</th>
+                        <th>Status</th>
                         <th>Adresse</th>
                         <th>Pays</th>
+                        <th>Email</th>
                         <th>Articles</th>
                         <th>P.U</th>
                         <th>ID Commande</th>
@@ -35,8 +37,10 @@
                     <tr>
                       <td>{{ $order->id }}</td>
                       <td>{{ $order->nom }}</td>
+                      <td>{{ $order->status }}</td>
                       <td>{{ $order->adresse }}</td>
                       <td>{{ $order->pays }}</td>
+                      <td>{{ $order->email }}</td>
                       <td>
                       @foreach ($order->items as $item)
                       #{{ $item->product_name }} : {{ $item->quantity }}<br>
@@ -55,8 +59,15 @@
                           @csrf
                           @method('DELETE')
                           <button type="submit" class="btn btn-danger">Supprimer</button>
+                        </form>
+                        <form action="{{ route('admin.sendOrderEmail', $order->id) }}" method="POST" style="display:inline;">
+                          @csrf
+                          <button type="submit" class="btn btn-info">Traiter</button>
+                        </form>
+                        <form action="{{ route('admin.sendOrderProcessedEmail', $order->id) }}" method="POST" style="display:inline;">
+                          @csrf
+                          <button type="submit" class="btn btn-success">Valider</button>
                       </form>
-                      
                       </td>
                   </tr>
                     @endforeach

@@ -123,7 +123,7 @@
                 </table>
 
                 <div class="billing-address">
-                    <h3>Adresse de facturation</h3>
+                    <h3>Adresse de livraison</h3>
                     <div class="address-details">
                         <p>{{$order->nom}}<br>
                         {{$order->adresse}}<br>

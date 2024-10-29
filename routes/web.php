@@ -89,6 +89,10 @@ Route::get('/generatePdf', 'PdfController@generateSimplePdf');
 
 Route::get('/admin', 'AdminController@dashboard');
 Route::get('/commandes', 'AdminController@commandes');
+Route::post('/admin/send-order-email/{id}', 'AdminController@sendOrderUpdateEmail')->name('admin.sendOrderEmail');
+Route::post('/admin/send-order-processed-email/{id}', 'AdminController@sendOrderProcessedEmail')->name('admin.sendOrderProcessedEmail');
+
+
 // createion article de blog
 //explication un bonne fois pour toutes
 // admin/articles/create = quand je tape cette adresse ca va aller dans class create et affiche ce qui est indiqué làba
@@ -180,6 +184,8 @@ Route::post('/update-country', 'ClientController@updateCountry')->name('updateCo
 Route::middleware('auth:admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/generatePdf/{id}', 'PdfController@generatePdf');
+    Route::post('/admin/send-order-email/{id}', 'AdminController@sendOrderUpdateEmail')->name('admin.sendOrderEmail');
+
 
     Route::get('/commandes', 'AdminController@commandes')->name('admin.commandes');
 

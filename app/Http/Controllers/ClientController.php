@@ -262,7 +262,8 @@ class ClientController extends Controller
         // Calculer le total avec les frais d'expédition
         $totalPriceWithShipping = $cart->totalPrice + $shippingCost;
 
-        
+        $email = Session::get('client')->email;
+
         // Créer une nouvelle commande
         $order = new Order();
         $order->nom = $request->input('nom');
@@ -270,6 +271,7 @@ class ClientController extends Controller
         $order->pays = $request->input('pays');
         $order->phone_number = $request->input('phone_number');    
         $order->total_price = $totalPriceWithShipping;
+        $order->email = $email;
         $order->save();
     
         // Générer un payment_id automatiquement
@@ -291,7 +293,7 @@ class ClientController extends Controller
 
 
         //return view('admin.commandes', compact('orders'));
-        $email = Session::get('client')->email;
+        
         Mail::to($email)->send(new SendMail($order,$totalPriceSimple, $shippingCost));
 
         // Vous pouvez aussi envoyer une copie à vous-même
