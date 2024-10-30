@@ -54,7 +54,7 @@
                       <td>{{ $order->payment_id }}</td>
                       <td>{{ $order->total_price }} €</td>
                       <td>                          
-                        <button class="btn btn-outline-primary" onclick="window.location ='{{ url('/generatePdf/' . $order->id) }}'">Detail</button>
+                        <button class="btn btn-outline-primary" onclick="window.location ='{{ url('/generatePdf/' . $order->id) }}'">Telecharger</button>
                         <form action="{{ route('admin.deleteOrder', $order->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette commande ?');">
                           @csrf
                           @method('DELETE')

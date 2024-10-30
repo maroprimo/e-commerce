@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Dompdf\Dompdf;
 use App\Order;
+use App\OrderArticle;
 use Session;
-use PDF; // alias de Barryvdh\DomPDF\Facade
+use PDF; 
+use Barryvdh\DomPDF\Facade;
 
 class PdfController extends Controller
-
 {
     //
     
@@ -18,41 +19,83 @@ class PdfController extends Controller
     {
         // Instanciation de Dompdf
         $dompdf = new Dompdf();
-        $order = Order::find($id);
+        $order = Order::with('items')->findOrFail($id);
     
-        
-            $name = $order->product_name;
-            $quantity = $order->quantity;
-            $date = $order->created_at;
-        
-    /*
-        $order->transform(function($order, $key){
-            $order->panier = unserialize($order->panier);
-            return $order;
-        });*/
+        // Variables à utiliser dans le HTML
+        $clientName = $order->nom;
+        $clientAddress = $order->adresse;
+        $clientCountry = $order->pays;
+        $clientEmail = $order->email;
+        $totalPrice = number_format($order->total_price, 2);
+        $itemsHtml = "";
     
-        // Génération du contenu HTML à convertir en PDF
+        // Boucle pour générer les lignes d'articles dans la table
+        foreach ($order->items as $item) {
+            $productName = $item->product_name;
+            $quantity = $item->quantity;
+            $unitPrice = number_format($item->price, 2);
+            $itemTotal = number_format($quantity * $item->price, 2);
+    
+            $itemsHtml .= "
+                <tr>
+                    <td>{$productName}</td>
+                    <td>{$quantity}</td>
+                    <td>{$unitPrice} €</td>
+                    <td>{$itemTotal} €</td>
+                </tr>";
+        }
+    
+        // Contenu HTML à convertir en PDF
         $html = "
-            <h1>Mon titre PDF</h1>
-            <p>Ceci est un test de génération de PDF avec dompdf.</p>
-            <table border='1'>
-                <thead>
-                    <tr>
-                        <th>Client Name</th>
-                        <th>Client Address</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{$name}</td>
-                        <td>{$quantity}</td>
-                        <td>{$date}</td>
-                    </tr>
-                </tbody>
-            </table>";
-            
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; }
+            .invoice-header, .invoice-footer { text-align: center; }
+            .invoice-title { font-size: 24px; font-weight: bold; }
+            .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+            .table th { background-color: #f2f2f2; text-align: left; }
+            .total { font-weight: bold; }
+        </style>
+    </head>
+    <body>
+        <div class=\"invoice-header\">
+            <h1 class=\"invoice-title\">Facture</h1>
+        </div>
         
+        <div>
+            <p><strong>Nom client:</strong> {$clientName}</p>
+            <p><strong>Adresse:</strong> {$clientAddress}</p>
+            <p><strong>Pays:</strong> {$clientCountry}</p>
+            <p><strong>Email:</strong> {$clientEmail}</p>
+        </div>
+    
+        <table class=\"table\">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Quantité</th>
+                    <th>Prix Unitaire</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {$itemsHtml}
+                <tr>
+                    <td colspan=\"3\" class=\"total\">Total</td>
+                    <td class=\"total\">{$totalPrice} €</td>
+                </tr>
+            </tbody>
+        </table>
+    
+        <div class=\"invoice-footer\">
+            <p>Merci pour votre achat !</p>
+        </div>
+    </body>
+    </html>";
+    
         // Charger le HTML dans dompdf
         $dompdf->loadHtml($html);
         
@@ -62,17 +105,11 @@ class PdfController extends Controller
         // Rendre le PDF
         $dompdf->render();
         
-            // Ajouter les en-têtes HTTP pour le PDF
-    header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="mon_fichier.pdf"');
-    header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1
-    header('Pragma: no-cache'); // HTTP 1.0
-    header('Expires: 0'); // Proche du passé
-
-    // Sortir le PDF au navigateur
-    return $dompdf->stream("mon_fichier.pdf", ["Attachment" => false]);
+        // Télécharger le PDF
+        return $dompdf->stream("facture_{$order->id}.pdf", ["Attachment" => true]);
         
     }
+
 
     public function voir1_pdf($id){
 
@@ -162,4 +199,5 @@ class PdfController extends Controller
 
     }
 }
+
 

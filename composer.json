@@ -9,6 +9,7 @@
     "type": "project",
     "require": {
         "php": ">=7.3.21",
+        "barryvdh/laravel-dompdf": "*",
         "laravel/framework": "^5.8.0",
         "laravel/tinker": "~1.0",
         "laravel/ui": "1.2",
